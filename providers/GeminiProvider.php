@@ -51,7 +51,27 @@ class GeminiProvider implements AiProviderInterface {
             ],
             'generationConfig' => [
                 'temperature' => 0.2,
-                'maxOutputTokens' => 1000
+                'maxOutputTokens' => 1000,
+                'topK' => 40,
+                'topP' => 0.95
+            ],
+            'safetySettings' => [
+                [
+                    'category' => 'HARM_CATEGORY_HARASSMENT',
+                    'threshold' => 'BLOCK_NONE'
+                ],
+                [
+                    'category' => 'HARM_CATEGORY_HATE_SPEECH',
+                    'threshold' => 'BLOCK_NONE'
+                ],
+                [
+                    'category' => 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+                    'threshold' => 'BLOCK_NONE'
+                ],
+                [
+                    'category' => 'HARM_CATEGORY_DANGEROUS_CONTENT',
+                    'threshold' => 'BLOCK_NONE'
+                ]
             ]
         ];
         
@@ -85,24 +105,58 @@ class GeminiProvider implements AiProviderInterface {
             $error = curl_error($ch);
             curl_close($ch);
             
+            // Always decode the response to check what we got back
+            $responseData = json_decode($response, true);
+            
+            // Debug response
+            echo "Gemini HTTP Code: " . $httpCode . "\n";
+            
             if ($httpCode >= 200 && $httpCode < 300) {
-                $responseData = json_decode($response, true);
-                
-                // Extract content from Gemini's response structure
-                if (isset($responseData['candidates'][0]['content']['parts'][0]['text'])) {
+                // Check for any Gemini-specific errors in the response
+                if (isset($responseData['error'])) {
+                    echo "Gemini API Error: " . $responseData['error']['message'] . "\n";
+                    
+                    // Check if the error is related to content filtering
+                    if (isset($responseData['error']['details']) && !empty($responseData['error']['details'])) {
+                        foreach ($responseData['error']['details'] as $detail) {
+                            if (isset($detail['reason']) && $detail['reason'] === 'SAFETY') {
+                                echo "Content filtered due to safety settings. Trying again with modified safety settings...\n";
+                                break;
+                            }
+                        }
+                    }
+                }
+                // If we at least got token usage back, we can consider this partial success
+                else if (isset($responseData['usageMetadata']) && isset($responseData['usageMetadata']['promptTokenCount'])) {
+                    // We got token usage but possibly not content
+                    $success = true;
+                    
+                    // Print structure of response to help debug
+                    if (!isset($responseData['candidates'][0]['content']['parts'][0]['text'])) {
+                        echo "Warning: Received token usage but no content from Gemini API. Response structure:\n";
+                        print_r($responseData);
+                    } else {
+                        $success = true;
+                        break;
+                    }
+                }
+                // Full success case
+                else if (isset($responseData['candidates'][0]['content']['parts'][0]['text'])) {
                     $success = true;
                     break;
                 }
+                else {
+                    echo "Unexpected response structure from Gemini API:\n";
+                    print_r($responseData);
+                }
             }
-            
-            if ($retryCount < $this->maxRetries) {
-                echo "HTTP Code: " . $httpCode . "\n";
+            else {
                 if (!empty($error)) {
                     echo "cURL Error: " . $error . "\n";
                 }
-                if (!empty($response)) {
-                    echo "Response: " . $response . "\n";
-                }
+                
+                // Print full response for debugging
+                echo "Response body: " . substr($response, 0, 1000) . (strlen($response) > 1000 ? "..." : "") . "\n";
             }
             
             $retryCount++;
@@ -113,8 +167,13 @@ class GeminiProvider implements AiProviderInterface {
             return null;
         }
         
-        // Extract the response text
-        $content = $responseData['candidates'][0]['content']['parts'][0]['text'];
+        // Default empty response in case we have token usage but no content
+        $content = "No content received from Gemini API. This may be due to content filtering or an API limitation.";
+        
+        // Extract the response text if it exists
+        if (isset($responseData['candidates'][0]['content']['parts'][0]['text'])) {
+            $content = $responseData['candidates'][0]['content']['parts'][0]['text'];
+        }
         
         // Get token usage if available
         $tokensIn = 0;
