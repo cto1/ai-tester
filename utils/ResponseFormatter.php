@@ -53,11 +53,10 @@ class ResponseFormatter {
         echo "Analysis report saved to: {$mdOutputFile}\n";
     }
 
-    public function formatResults(array $results, string $outputDir): void {
+    public function formatResults(array $results, string $outputDir, string $timestamp): void {
         foreach ($results as $provider => $result) {
             if (!$result) continue;
 
-            $timestamp = date('Y-m-d_H-i-s');
             $outputFile = $outputDir . "/{$provider}_response_{$timestamp}.txt";
             
             $content = "====== {$provider} Response ======\n\n";

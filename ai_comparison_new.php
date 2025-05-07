@@ -63,8 +63,14 @@ try {
         throw new RuntimeException("No input provided. Please provide either a file path or text input.");
     }
 
+    // Get selected providers
+    $selectedProviders = $_POST['providers'] ?? array_keys($allProviders);
+    if (!is_array($selectedProviders)) {
+        $selectedProviders = [$selectedProviders];
+    }
+    
     // Check if input is a file path and read its contents
-    if (file_exists($input)) {
+    if (file_exists($input) && !in_array('mistral-ocr', $selectedProviders)) {
         $fileContents = file_get_contents($input);
         if ($fileContents === false) {
             throw new RuntimeException("Failed to read file: {$input}");
@@ -72,8 +78,7 @@ try {
         $input = $fileContents;
     }
     
-    // Get selected providers
-    $selectedProviders = $_POST['providers'] ?? array_keys($allProviders);
+    // Get providers to use
     $providers = array_intersect_key($allProviders, array_flip($selectedProviders));
     
     // Create base output directory
@@ -98,7 +103,7 @@ try {
     $isFile = file_exists($input);
     $extractedText = null;
     
-    if ($isFile && ($useOcrForAll || in_array('mistral-ocr', $selectedProviders))) {
+    if (in_array('mistral-ocr', $selectedProviders)) {
         echo "Processing file with OCR...\n";
         $ocrResult = $ocrProvider->callApi($input, '', $outputDir);
         if ($ocrResult && isset($ocrResult['extracted_text'])) {
@@ -106,6 +111,12 @@ try {
             if ($useOcrForAll) {
                 $input = $extractedText;
             }
+            // Add OCR result to results array
+            $results['mistral-ocr'] = [
+                'content' => $extractedText,
+                'tokens_in' => 0,
+                'tokens_out' => 0
+            ];
         } else {
             throw new RuntimeException("Failed to extract text from file using OCR: {$input}");
         }
@@ -115,6 +126,17 @@ try {
     $bankAnalysis = $_POST['bank_analysis'] ?? false;
     $bankAnalysisProvider = $_POST['bank_analysis_provider'] ?? null;
     $questionsFile = $_POST['questions_file'] ?? null;
+    
+    $results = [];
+    
+    // Add OCR results if we have them
+    if (isset($results['mistral-ocr'])) {
+        $results['mistral-ocr'] = [
+            'content' => $extractedText,
+            'tokens_in' => 0,
+            'tokens_out' => 0
+        ];
+    }
     
     if ($bankAnalysis) {
         if (!$bankAnalysisProvider || !isset($providers[$bankAnalysisProvider])) {
@@ -155,13 +177,12 @@ try {
         echo "\nProcessing bank analysis with {$bankAnalysisProvider}...\n";
         $result = $providers[$bankAnalysisProvider]->callApi($prompt, '', $outputDir);
         if ($result) {
-            $results = [$bankAnalysisProvider => $result];
+            $results[$bankAnalysisProvider] = $result;
         } else {
             throw new RuntimeException("Failed to get analysis from {$bankAnalysisProvider}");
         }
     } else {
         // Process with each selected provider
-        $results = [];
         foreach ($providers as $name => $provider) {
             if ($name === 'mistral-ocr') continue; // Skip OCR provider for text analysis
             
@@ -175,7 +196,7 @@ try {
     
     // Format and save results
     if (!empty($results)) {
-        $formatter->formatResults($results, $outputDir);
+        $formatter->formatResults($results, $outputDir, $timestamp);
         echo "\nResults have been saved to: {$outputDir}\n";
     } else {
         throw new RuntimeException("No results were obtained from any provider.");

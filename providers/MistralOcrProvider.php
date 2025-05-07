@@ -36,7 +36,8 @@ class MistralOcrProvider implements AiProviderInterface {
                 $fileId = $uploadResult['file_id']; // Save file ID for later deletion
                 echo "Using uploaded file URL for OCR: " . $fileUrl . "\n";
             } else {
-                $fileUrl = $prompt;
+                echo "Error: File not found at path: $prompt\n";
+                return null;
             }
             
             echo "Sending request to Mistral OCR API...\n";

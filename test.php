@@ -146,6 +146,9 @@ if ($input === null && $mdFile === null) {
 // Set up the input for the main script
 if ($mdFile !== null) {
     $_POST['input'] = file_get_contents($mdFile);
+} else if (in_array('mistral-ocr', $providers) && $input !== null && file_exists($input)) {
+    // For OCR, pass the file path directly
+    $_POST['input'] = $input;
 } else {
     $_POST['input'] = $input;
 }
