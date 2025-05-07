@@ -44,8 +44,8 @@ class FileUploader {
         if ($httpCode !== 200) {
             $error = curl_error($ch);
             curl_close($ch);
-            echo "HTTP Code: " . $httpCode . "\n";
-            echo "Response: " . $response . "\n";
+            // echo "HTTP Code: " . $httpCode . "\n";
+            // echo "Response: " . $response . "\n";
             echo "Error uploading file: " . ($error ?: 'HTTP Code ' . $httpCode) . "\n";
             return null;
         }
@@ -63,7 +63,7 @@ class FileUploader {
         echo "File uploaded successfully! File ID: " . $fileId . "\n";
         
         // Get the signed URL for the uploaded file
-        echo "Getting signed URL for file...\n";
+        // echo "Getting signed URL for file...\n";
         
         $ch = curl_init("https://api.mistral.ai/v1/files/{$fileId}/url");
         
@@ -77,8 +77,8 @@ class FileUploader {
         if ($httpCode !== 200) {
             $error = curl_error($ch);
             curl_close($ch);
-            echo "HTTP Code: " . $httpCode . "\n";
-            echo "Response: " . $response . "\n";
+            // echo "HTTP Code: " . $httpCode . "\n";
+            // echo "Response: " . $response . "\n";
             echo "Error getting signed URL: " . ($error ?: 'HTTP Code ' . $httpCode) . "\n";
             return null;
         }
@@ -88,7 +88,7 @@ class FileUploader {
         $urlResponseData = json_decode($response, true);
         
         if (!isset($urlResponseData['url'])) {
-            echo "Unexpected URL response format. Full response: " . json_encode($urlResponseData, JSON_PRETTY_PRINT) . "\n";
+            // echo "Unexpected URL response format. Full response: " . json_encode($urlResponseData, JSON_PRETTY_PRINT) . "\n";
             return null;
         }
         
@@ -123,8 +123,8 @@ class FileUploader {
         if ($httpCode !== 200) {
             $error = curl_error($ch);
             curl_close($ch);
-            echo "HTTP Code: " . $httpCode . "\n";
-            echo "Response: " . $response . "\n";
+            // echo "HTTP Code: " . $httpCode . "\n";
+            // echo "Response: " . $response . "\n";
             echo "Error deleting file: " . ($error ?: 'HTTP Code ' . $httpCode) . "\n";
             return false;
         }
