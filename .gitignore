@@ -72,3 +72,5 @@ test_results/*
 # OCR results
 ai_responses/*
 
+# Uploads
+uploads/*
