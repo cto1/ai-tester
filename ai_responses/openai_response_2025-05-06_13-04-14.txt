@@ -1,0 +1,8 @@
+====== OpenAI Response ======
+
+The balance on the most recent statement, dated 9 January 2025, is £1,564.97 overdrawn (OD). This means the account is in overdraft by £1,564.97.
+
+Token Usage:
+Prompt tokens: 14523
+Completion tokens: 46
+Total tokens: 14569

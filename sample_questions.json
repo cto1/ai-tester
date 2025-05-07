@@ -1,0 +1,20 @@
+{
+  "_description": "This is a sample file demonstrating how to format custom questions for the AI analysis. Each key should be a unique identifier for the question, and the value is the actual question text. The keys will be used to organize the results in the output file.",
+  
+  "_section_basic": "Basic account information",
+  "business_name": "What is the business name on the account? Answer only with the business name.",
+  "account_number": "What is the account number shown on the statement?",
+  
+  "_section_balance": "Balance information",
+  "starting_balance": "What is the starting balance of the account for this statement period?",
+  "ending_balance": "What is the ending balance of the account for this statement period?",
+  
+  "_section_transactions": "Transaction summaries",
+  "total_deposits": "What is the total amount of all deposits/credits during this statement period?",
+  "total_withdrawals": "What is the total amount of all withdrawals/debits during this statement period?",
+  "largest_transaction": "What was the largest single transaction in this statement period? Provide the date, amount, and description.",
+  
+  "_section_payments": "Payment analysis",
+  "recurring_payments": "Identify all recurring payments in this statement (payments of the same or similar amount to the same payee). List them with their frequency if possible.",
+  "payment_categories": "Categorize the payments in this statement into common expense categories (e.g., utilities, food, transportation). Provide the total for each category."
+} 

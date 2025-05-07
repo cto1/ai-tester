@@ -1,0 +1,47 @@
+====== DeepSeek AI Response ======
+
+Based on the provided financial statements for Holtwhites Accommodation & Support Services Ltd with Lloyds Bank, here is the analysis of the account balances over the specified periods:
+
+### **Account Balances Summary**:
+1. **23 December 2024**:  
+   - **Closing Balance**: **£9,033.78** (positive balance)  
+   - **Overdraft Limit**: £5,000.00  
+
+2. **9 January 2025**:  
+   - **Closing Balance**: **£1,564.97 OD** (overdrawn)  
+   - **Total Paid In**: £70.00  
+   - **Total Paid Out**: £10,668.75  
+
+3. **23 October 2024**:  
+   - **Closing Balance**: **£488.90** (positive balance)  
+
+4. **11 November 2024**:  
+   - **Closing Balance**: **£5,332.08 OD** (overdrawn)  
+
+5. **22 November 2024**:  
+   - **Closing Balance**: **£4,942.64 OD** (overdrawn)  
+
+6. **9 December 2024**:  
+   - **Closing Balance**: **£5,027.07 OD** (overdrawn)  
+
+7. **23 September 2024**:  
+   - **Closing Balance**: **£5,045.97** (positive balance)  
+
+8. **9 August 2024**:  
+   - **Closing Balance**: **£5,001.50 OD** (overdrawn)  
+
+### **Key Observations**:
+- The account frequently operates near or exceeds its **overdraft limit (£5,000)**.  
+- The balance fluctuates between **positive and overdrawn** depending on incoming payments and withdrawals.  
+- **Major outflows** include loan repayments, direct debits (e.g., utilities, insurance), and business expenses.  
+- **Inflows** include payments from "G MCKENNA LOAN" and other deposits.  
+
+### **Latest Balance (as of 9 January 2025)**:
+- **£1,564.97 OD** (overdrawn by £1,564.97).  
+
+Would you like a deeper analysis of transactions or trends?
+
+Token Usage:
+Prompt tokens: 14740
+Completion tokens: 468
+Total tokens: 15208

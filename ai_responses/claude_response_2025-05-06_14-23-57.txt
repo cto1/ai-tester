@@ -1,0 +1,14 @@
+====== Claude (Anthropic) Response ======
+
+Based on the financial statements provided, the balance on the account as of the latest statement date of January 9, 2025 is £1,564.97 overdrawn (OD).
+
+The account started with a balance of £9,033.78 on December 23, 2024. Between then and January 9, 2025:
+
+- Total paid in: £70.00 
+- Total paid out: £10,668.75
+
+This resulted in the ending overdrawn balance of £1,564.97 on January 9, 2025.
+
+Token Usage:
+Input tokens: 17245
+Output tokens: 130

@@ -1,0 +1,8 @@
+{
+    "name": "docuneat/api",
+    "description": "DocuNeat API",
+    "type": "project",
+    "require": {
+        "vlucas/phpdotenv": "^5.6"
+    }
+}

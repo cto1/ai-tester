@@ -1,0 +1,22 @@
+====== OpenAI Response ======
+
+It seems like you're trying to execute a PHP script named `test.php` with the argument `openai`. To do this, you should use the command line interface (CLI) on your computer. Here’s how you can do it:
+
+1. **Open Terminal or Command Prompt:**
+   - On **Windows**, you can open Command Prompt by searching for "cmd" in the Start menu.
+   - On **macOS** or **Linux**, open the Terminal application.
+
+2. **Navigate to the Directory:**
+   - Use the `cd` command to navigate to the directory where your `test.php` file is located. For example:
+     ```bash
+     cd path/to/your/script
+     ```
+
+3. **Run the PHP Script:**
+   - Once you are in the correct directory, you can run the PHP script with the following command:
+     ```bash
+     php test.php openai
+     ```
+
+This command tells the PHP interpreter to execute the `test.php` script and pass `openai` as an argument to it. Make sure you have PHP installed on your system and that it's accessible from the command line. You can check if PHP is installed by running `php -v`, which should display the installed PHP version.
+

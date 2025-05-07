@@ -1,0 +1,8 @@
+====== OpenAI Response ======
+
+The balance on the Business Current Account as of 12 May 2023 is £6,922.55. This is confirmed by the "End balance" listed in the "At a glance" section and the "Balance carried forward" at the end of the transaction list for 12 May 2023.
+
+Token Usage:
+Prompt tokens: 11085
+Completion tokens: 64
+Total tokens: 11149
