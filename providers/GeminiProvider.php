@@ -33,47 +33,112 @@ class GeminiProvider implements AiProviderInterface {
         $httpCode = 0;
         $latencyMs = 0; // Initialize latency
         
-        // Combine system prompt and user prompt as Gemini's API structure
-        $fullPrompt = $prompt;
+        // Newer Gemini models like gemini-1.5 and 2.5 support system prompts properly
+        $parts = [];
+        
+        // Add system prompt if provided
         if (!empty($systemPrompt)) {
-            $fullPrompt = "$systemPrompt\n\n$prompt";
+            $parts[] = [
+                'role' => 'system',
+                'text' => $systemPrompt
+            ];
         }
         
-        $data = [
-            'contents' => [
-                [
-                    'parts' => [
-                        [
-                            'text' => $fullPrompt
+        // Add user prompt
+        $parts[] = [
+            'role' => 'user',
+            'text' => $prompt
+        ];
+        
+        // Different API request format for newer models
+        if (strpos($this->model, 'gemini-1.5') !== false || strpos($this->model, 'gemini-2') !== false) {
+            $data = [
+                'contents' => [
+                    [
+                        'role' => 'user',
+                        'parts' => [
+                            ['text' => $prompt]
                         ]
                     ]
+                ],
+                'generationConfig' => [
+                    'temperature' => 0.2,
+                    'maxOutputTokens' => 4000,
+                    'topK' => 40,
+                    'topP' => 0.95
+                ],
+                'safetySettings' => [
+                    [
+                        'category' => 'HARM_CATEGORY_HARASSMENT',
+                        'threshold' => 'BLOCK_NONE'
+                    ],
+                    [
+                        'category' => 'HARM_CATEGORY_HATE_SPEECH',
+                        'threshold' => 'BLOCK_NONE'
+                    ],
+                    [
+                        'category' => 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+                        'threshold' => 'BLOCK_NONE'
+                    ],
+                    [
+                        'category' => 'HARM_CATEGORY_DANGEROUS_CONTENT',
+                        'threshold' => 'BLOCK_NONE'
+                    ]
                 ]
-            ],
-            'generationConfig' => [
-                'temperature' => 0.2,
-                'maxOutputTokens' => 1000,
-                'topK' => 40,
-                'topP' => 0.95
-            ],
-            'safetySettings' => [
-                [
-                    'category' => 'HARM_CATEGORY_HARASSMENT',
-                    'threshold' => 'BLOCK_NONE'
+            ];
+            
+            // Add system prompt as system message if provided for newer models
+            if (!empty($systemPrompt)) {
+                array_unshift($data['contents'], [
+                    'role' => 'system',
+                    'parts' => [
+                        ['text' => $systemPrompt]
+                    ]
+                ]);
+            }
+        } else {
+            // Legacy format for older models like gemini-pro
+            $fullPrompt = $prompt;
+            if (!empty($systemPrompt)) {
+                $fullPrompt = "$systemPrompt\n\n$prompt";
+            }
+            
+            $data = [
+                'contents' => [
+                    [
+                        'parts' => [
+                            [
+                                'text' => $fullPrompt
+                            ]
+                        ]
+                    ]
                 ],
-                [
-                    'category' => 'HARM_CATEGORY_HATE_SPEECH',
-                    'threshold' => 'BLOCK_NONE'
+                'generationConfig' => [
+                    'temperature' => 0.2,
+                    'maxOutputTokens' => 4000,
+                    'topK' => 40,
+                    'topP' => 0.95
                 ],
-                [
-                    'category' => 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-                    'threshold' => 'BLOCK_NONE'
-                ],
-                [
-                    'category' => 'HARM_CATEGORY_DANGEROUS_CONTENT',
-                    'threshold' => 'BLOCK_NONE'
+                'safetySettings' => [
+                    [
+                        'category' => 'HARM_CATEGORY_HARASSMENT',
+                        'threshold' => 'BLOCK_NONE'
+                    ],
+                    [
+                        'category' => 'HARM_CATEGORY_HATE_SPEECH',
+                        'threshold' => 'BLOCK_NONE'
+                    ],
+                    [
+                        'category' => 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+                        'threshold' => 'BLOCK_NONE'
+                    ],
+                    [
+                        'category' => 'HARM_CATEGORY_DANGEROUS_CONTENT',
+                        'threshold' => 'BLOCK_NONE'
+                    ]
                 ]
-            ]
-        ];
+            ];
+        }
         
         // Gemini API URL - using the specified model
         $apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/{$this->model}:generateContent?key=" . $this->apiKey;
@@ -81,6 +146,11 @@ class GeminiProvider implements AiProviderInterface {
         $headers = [
             'Content-Type: application/json'
         ];
+        
+        // For debugging
+        // echo "Using model: {$this->model}\n";
+        // echo "Request data structure:\n";
+        // echo json_encode($data, JSON_PRETTY_PRINT) . "\n";
         
         while ($retryCount <= $this->maxRetries && !$success) {
             if ($retryCount > 0) {
@@ -111,6 +181,11 @@ class GeminiProvider implements AiProviderInterface {
             // Debug response
             echo "Gemini HTTP Code: " . $httpCode . "\n";
             
+            // Debug: Print the full raw response for detailed analysis
+            //echo "FULL RESPONSE FROM GEMINI API:\n";
+            //var_export($responseData);
+            //echo "\n";
+            
             if ($httpCode >= 200 && $httpCode < 300) {
                 // Check for any Gemini-specific errors in the response
                 if (isset($responseData['error'])) {
@@ -126,6 +201,20 @@ class GeminiProvider implements AiProviderInterface {
                         }
                     }
                 }
+                // Check if we got a 'finish reason' in the response that explains why there's no output
+                else if (isset($responseData['candidates'][0]['finishReason']) && 
+                         $responseData['candidates'][0]['finishReason'] !== 'STOP') {
+                    echo "Gemini finished generation with reason: " . $responseData['candidates'][0]['finishReason'] . "\n";
+                    
+                    if ($responseData['candidates'][0]['finishReason'] === 'SAFETY') {
+                        echo "Content was filtered due to safety settings.\n";
+                    } else if ($responseData['candidates'][0]['finishReason'] === 'RECITATION') {
+                        echo "Content was filtered due to recitation detection.\n";
+                    }
+                    
+                    // Consider this a "success" for reporting purposes even though we didn't get content
+                    $success = true;
+                }
                 // If we at least got token usage back, we can consider this partial success
                 else if (isset($responseData['usageMetadata']) && isset($responseData['usageMetadata']['promptTokenCount'])) {
                     // We got token usage but possibly not content
@@ -134,7 +223,8 @@ class GeminiProvider implements AiProviderInterface {
                     // Print structure of response to help debug
                     if (!isset($responseData['candidates'][0]['content']['parts'][0]['text'])) {
                         echo "Warning: Received token usage but no content from Gemini API. Response structure:\n";
-                        print_r($responseData);
+                        var_export($responseData);
+                        echo "\n";
                     } else {
                         $success = true;
                         break;
@@ -147,7 +237,8 @@ class GeminiProvider implements AiProviderInterface {
                 }
                 else {
                     echo "Unexpected response structure from Gemini API:\n";
-                    print_r($responseData);
+                    var_export($responseData);
+                    echo "\n";
                 }
             }
             else {
@@ -156,7 +247,7 @@ class GeminiProvider implements AiProviderInterface {
                 }
                 
                 // Print full response for debugging
-                echo "Response body: " . substr($response, 0, 1000) . (strlen($response) > 1000 ? "..." : "") . "\n";
+                echo "Response body: " . $response . "\n";
             }
             
             $retryCount++;
@@ -168,11 +259,16 @@ class GeminiProvider implements AiProviderInterface {
         }
         
         // Default empty response in case we have token usage but no content
-        $content = "No content received from Gemini API. This may be due to content filtering or an API limitation.";
+        $content = "No content received from Gemini API. This may be due to content filtering or an API limitation. Try using a different model or simplifying your prompt.";
         
         // Extract the response text if it exists
         if (isset($responseData['candidates'][0]['content']['parts'][0]['text'])) {
             $content = $responseData['candidates'][0]['content']['parts'][0]['text'];
+        } else if (isset($responseData['candidates'][0]['content']['parts'][0]['text']) && 
+                   empty($responseData['candidates'][0]['content']['parts'][0]['text']) &&
+                   isset($responseData['candidates'][0]['finishReason'])) {
+            // If we have an empty response but a finish reason, explain why
+            $content = "The model returned an empty response due to: " . $responseData['candidates'][0]['finishReason'];
         }
         
         // Get token usage if available

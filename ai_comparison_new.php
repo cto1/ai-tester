@@ -45,7 +45,7 @@ try {
         ],
         'gemini' => [
             'api_key' => $_ENV['GEMINI_API_KEY'],
-            'model' => $_ENV['GEMINI_MODEL'] ?? 'gemini-pro'
+            'model' => $_ENV['GEMINI_MODEL'] ?? 'gemini-1.5-pro'
         ]
     ];
     
