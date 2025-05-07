@@ -85,9 +85,19 @@ class MistralOcrProvider implements AiProviderInterface {
             
             $responseData = json_decode($response, true);
             
+            // Define a sub-directory for OCR outputs within the main output directory
+            $ocrOutputDir = $outputDir . "/ocr_output";
+            if (!file_exists($ocrOutputDir)) {
+                if (!mkdir($ocrOutputDir, 0755, true)) {
+                    // Fallback to main output directory if sub-directory creation fails
+                    echo "Warning: Failed to create OCR output sub-directory. Saving to main output directory instead.\n";
+                    $ocrOutputDir = $outputDir;
+                }
+            }
+            
             // Save the full OCR response
             $timestamp = date('Y-m-d_H-i-s');
-            $outputFile = $outputDir . "/mistral_ocr_response_{$timestamp}.json";
+            $outputFile = $ocrOutputDir . "/mistral_ocr_response_{$timestamp}.json"; // Use ocrOutputDir
             file_put_contents($outputFile, json_encode($responseData, JSON_PRETTY_PRINT));
             
             echo "OCR response saved to: " . $outputFile . "\n";
@@ -99,7 +109,7 @@ class MistralOcrProvider implements AiProviderInterface {
                 $extractedText = "";
                 
                 // Create a file to save the markdown content
-                $mdOutputFile = $outputDir . "/mistral_ocr_text_{$timestamp}.md";
+                $mdOutputFile = $ocrOutputDir . "/mistral_ocr_text_{$timestamp}.md"; // Use ocrOutputDir
                 $mdFile = fopen($mdOutputFile, 'w');
                 
                 foreach ($responseData['pages'] as $page) {
@@ -119,7 +129,7 @@ class MistralOcrProvider implements AiProviderInterface {
                     
                     // Save images if they exist
                     if (isset($page['images']) && !empty($page['images'])) {
-                        $imageDir = $outputDir . "/images_{$timestamp}";
+                        $imageDir = $ocrOutputDir . "/images_{$timestamp}"; // Use ocrOutputDir
                         if (!file_exists($imageDir)) {
                             mkdir($imageDir, 0755, true);
                         }
@@ -148,9 +158,9 @@ class MistralOcrProvider implements AiProviderInterface {
                 echo "Markdown content saved to: $mdOutputFile\n";
                 
                 if ($extractedText !== "Could not extract text from OCR results") {
-                    echo "\nExtracted text from PDF via OCR:\n";
-                    echo "---------------------------------\n";
-                    echo substr($extractedText, 0, 500) . "...\n"; // Show first 500 chars
+                    // echo "\nExtracted text from PDF via OCR:\n";
+                    // echo "---------------------------------\n";
+                    // echo substr($extractedText, 0, 500) . "...\n"; // Show first 500 chars
                     
                     $result = [
                         'extracted_text' => $extractedText,

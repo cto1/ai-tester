@@ -108,6 +108,9 @@ try {
         $ocrResult = $ocrProvider->callApi($input, '', $outputDir);
         if ($ocrResult && isset($ocrResult['extracted_text'])) {
             $extractedText = $ocrResult['extracted_text'];
+            if (isset($ocrResult['latency_ms'])) {
+                echo "OCR Latency: " . $ocrResult['latency_ms'] . " ms\n";
+            }
             if ($useOcrForAll) {
                 $input = $extractedText;
             }
@@ -115,7 +118,8 @@ try {
             $results['mistral-ocr'] = [
                 'content' => $extractedText,
                 'tokens_in' => 0,
-                'tokens_out' => 0
+                'tokens_out' => 0,
+                'latency_ms' => $ocrResult['latency_ms'] ?? 0
             ];
         } else {
             throw new RuntimeException("Failed to extract text from file using OCR: {$input}");
@@ -131,11 +135,15 @@ try {
     
     // Add OCR results if we have them
     if (isset($results['mistral-ocr'])) {
-        $results['mistral-ocr'] = [
-            'content' => $extractedText,
-            'tokens_in' => 0,
-            'tokens_out' => 0
-        ];
+        // This assignment was redundant as it was already done above, 
+        // but ensuring latency is part of it if it was initialized here.
+        // However, the primary $results['mistral-ocr'] is now set within the OCR processing block.
+        // $results['mistral-ocr'] = [
+        //     'content' => $extractedText,
+        //     'tokens_in' => 0,
+        //     'tokens_out' => 0,
+        //     'latency_ms' => $results['mistral-ocr']['latency_ms'] ?? ($ocrResult['latency_ms'] ?? 0) // Carry over latency
+        // ];
     }
     
     if ($bankAnalysis) {
@@ -177,6 +185,9 @@ try {
         echo "\nProcessing bank analysis with {$bankAnalysisProvider}...\n";
         $result = $providers[$bankAnalysisProvider]->callApi($prompt, '', $outputDir);
         if ($result) {
+            echo "{$bankAnalysisProvider} (Bank Analysis) Latency: " . ($result['latency_ms'] ?? 'N/A') . " ms\n";
+            echo "{$bankAnalysisProvider} (Bank Analysis) Tokens In: " . ($result['tokens_in'] ?? 'N/A') . "\n";
+            echo "{$bankAnalysisProvider} (Bank Analysis) Tokens Out: " . ($result['tokens_out'] ?? 'N/A') . "\n";
             $results[$bankAnalysisProvider] = $result;
         } else {
             throw new RuntimeException("Failed to get analysis from {$bankAnalysisProvider}");
@@ -189,6 +200,9 @@ try {
             echo "\nProcessing with {$name}...\n";
             $result = $provider->callApi($input, '', $outputDir);
             if ($result) {
+                echo "{$name} Latency: " . ($result['latency_ms'] ?? 'N/A') . " ms\n";
+                echo "{$name} Tokens In: " . ($result['tokens_in'] ?? 'N/A') . "\n";
+                echo "{$name} Tokens Out: " . ($result['tokens_out'] ?? 'N/A') . "\n";
                 $results[$name] = $result;
             }
         }
