@@ -20,18 +20,18 @@ class MistralProvider implements AiProviderInterface {
         }
         
         // Save output to file
-        $timestamp = date('Y-m-d_H-i-s');
-        $outputFile = $outputDir . "/mistral_response_{$timestamp}.txt";
-        file_put_contents($outputFile, "====== Mistral AI Response ======\n\n" . $result['content'] . "\n\n");
+        // $timestamp = date('Y-m-d_H-i-s');
+        // $outputFile = $outputDir . "/mistral_response_{$timestamp}.txt";
+        // file_put_contents($outputFile, "====== Mistral AI Response ======\n\n" . $result['content'] . "\n\n");
         
-        if (isset($result['usage'])) {
-            file_put_contents($outputFile, "Token Usage:\n", FILE_APPEND);
-            file_put_contents($outputFile, "Prompt tokens: " . $result['usage']['prompt_tokens'] . "\n", FILE_APPEND);
-            file_put_contents($outputFile, "Completion tokens: " . $result['usage']['completion_tokens'] . "\n", FILE_APPEND);
-            file_put_contents($outputFile, "Total tokens: " . $result['usage']['total_tokens'] . "\n", FILE_APPEND);
-        }
+        // if (isset($result['usage'])) {
+        //     file_put_contents($outputFile, "Token Usage:\n", FILE_APPEND);
+        //     file_put_contents($outputFile, "Prompt tokens: " . $result['usage']['prompt_tokens'] . "\n", FILE_APPEND);
+        //     file_put_contents($outputFile, "Completion tokens: " . $result['usage']['completion_tokens'] . "\n", FILE_APPEND);
+        //     file_put_contents($outputFile, "Total tokens: " . $result['usage']['total_tokens'] . "\n", FILE_APPEND);
+        // }
         
-        echo "Response saved to: " . $outputFile . "\n";
+        // echo "Response saved to: " . $outputFile . "\n";
         
         return $result;
     }

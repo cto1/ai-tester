@@ -20,17 +20,17 @@ class ClaudeProvider implements AiProviderInterface {
         }
         
         // Save output to file
-        $timestamp = date('Y-m-d_H-i-s');
-        $outputFile = $outputDir . "/claude_response_{$timestamp}.txt";
-        file_put_contents($outputFile, "====== Claude (Anthropic) Response ======\n\n" . $result['content'] . "\n\n");
+        // $timestamp = date('Y-m-d_H-i-s');
+        // $outputFile = $outputDir . "/claude_response_{$timestamp}.txt";
+        // file_put_contents($outputFile, "====== Claude (Anthropic) Response ======\n\n" . $result['content'] . "\n\n");
         
-        if (isset($result['usage'])) {
-            file_put_contents($outputFile, "Token Usage:\n", FILE_APPEND);
-            file_put_contents($outputFile, "Input tokens: " . $result['usage']['input_tokens'] . "\n", FILE_APPEND);
-            file_put_contents($outputFile, "Output tokens: " . $result['usage']['output_tokens'] . "\n", FILE_APPEND);
-        }
+        // if (isset($result['usage'])) {
+        //     file_put_contents($outputFile, "Token Usage:\n", FILE_APPEND);
+        //     file_put_contents($outputFile, "Input tokens: " . $result['usage']['input_tokens'] . "\n", FILE_APPEND);
+        //     file_put_contents($outputFile, "Output tokens: " . $result['usage']['output_tokens'] . "\n", FILE_APPEND);
+        // }
         
-        echo "Response saved to: " . $outputFile . "\n";
+        // echo "Response saved to: " . $outputFile . "\n";
         
         return $result;
     }
@@ -41,6 +41,7 @@ class ClaudeProvider implements AiProviderInterface {
         $response = null;
         $responseData = null;
         $httpCode = 0;
+        $latencyMs = 0;
         
         $data = [
             'model' => 'claude-3-opus-20240229',
@@ -72,7 +73,11 @@ class ClaudeProvider implements AiProviderInterface {
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
             
+            $startTime = microtime(true);
             $response = curl_exec($ch);
+            $endTime = microtime(true);
+            $latencyMs = round(($endTime - $startTime) * 1000);
+
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             $error = curl_error($ch);
             curl_close($ch);
@@ -106,7 +111,8 @@ class ClaudeProvider implements AiProviderInterface {
         return [
             'content' => $responseData['content'][0]['text'],
             'tokens_in' => $responseData['usage']['input_tokens'] ?? 0,
-            'tokens_out' => $responseData['usage']['output_tokens'] ?? 0
+            'tokens_out' => $responseData['usage']['output_tokens'] ?? 0,
+            'latency_ms' => $latencyMs
         ];
     }
 } 
