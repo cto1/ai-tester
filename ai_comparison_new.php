@@ -76,9 +76,17 @@ try {
     $selectedProviders = $_POST['providers'] ?? array_keys($allProviders);
     $providers = array_intersect_key($allProviders, array_flip($selectedProviders));
     
-    // Create output directory
+    // Create base output directory
+    $baseOutputDir = __DIR__ . "/test_results";
+    if (!file_exists($baseOutputDir)) {
+        if (!mkdir($baseOutputDir, 0755, true)) {
+            throw new RuntimeException("Failed to create base output directory: {$baseOutputDir}");
+        }
+    }
+
+    // Create timestamped output directory
     $timestamp = date('Y-m-d_H-i-s');
-    $outputDir = __DIR__ . "/output_{$timestamp}";
+    $outputDir = $baseOutputDir . "/run_{$timestamp}";
     if (!file_exists($outputDir)) {
         if (!mkdir($outputDir, 0755, true)) {
             throw new RuntimeException("Failed to create output directory: {$outputDir}");

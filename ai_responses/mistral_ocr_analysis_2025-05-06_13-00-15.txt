@@ -1,8 +1,0 @@
-====== Mistral OCR Analysis ======
-
-Based on the provided financial statement, the balance of the business account for HOLTWHITES ACCOMMODATION & SUPPORT SERVICES LTD is £35,800. This can be found at the beginning of the statement, under the Lloyds Bank header.
-
-Token Usage:
-Prompt tokens: 687
-Completion tokens: 64
-Total tokens: 751

@@ -67,3 +67,5 @@ Thumbs.db
 
 # Output
 output_*
+test_results/*
+

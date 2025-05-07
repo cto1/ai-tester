@@ -1,8 +1,0 @@
-====== OpenAI Response ======
-
-Please provide the text of the financial statement you would like me to analyze, and I'll help you determine the balance.
-
-Token Usage:
-Prompt tokens: 39
-Completion tokens: 24
-Total tokens: 63
