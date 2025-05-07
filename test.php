@@ -31,7 +31,7 @@ if ($argc === 1 || in_array($argv[1], ['-h', '--help'])) {
     echo "AI Provider Comparison Tool\n";
     echo "==========================\n";
     echo "Usage: php test.php [provider1] [provider2] ...\n";
-    echo "Available providers: deepseek, openai, claude, mistral, mistral-ocr\n\n";
+    echo "Available providers: deepseek, openai, claude, mistral, mistral-ocr, gemini\n\n";
     
     echo "Special options:\n";
     echo "  mistral-ocr [file path]   - Process a document with Mistral OCR\n";
@@ -93,7 +93,7 @@ for ($i = 1; $i < $argc; $i++) {
             $bankAnalysis = true;
             if (isset($argv[$i + 1])) {
                 $bankAnalysisProvider = $argv[++$i];
-                if (!in_array($bankAnalysisProvider, ['deepseek', 'openai', 'claude', 'mistral'])) {
+                if (!in_array($bankAnalysisProvider, ['deepseek', 'openai', 'claude', 'mistral', 'gemini'])) {
                     die("Error: Invalid provider for bank analysis: $bankAnalysisProvider\n");
                 }
             } else {
@@ -123,7 +123,7 @@ for ($i = 1; $i < $argc; $i++) {
             break;
             
         default:
-            if (in_array($arg, ['deepseek', 'openai', 'claude', 'mistral'])) {
+            if (in_array($arg, ['deepseek', 'openai', 'claude', 'mistral', 'gemini'])) {
                 $providers[] = $arg;
             } else if (!str_starts_with($arg, '--')) {
                 // If it's not a known provider and not an option, it might be a file path
@@ -134,7 +134,7 @@ for ($i = 1; $i < $argc; $i++) {
 
 // If no providers specified, use all
 if (empty($providers)) {
-    $providers = ['deepseek', 'openai', 'claude', 'mistral'];
+    $providers = ['deepseek', 'openai', 'claude', 'mistral', 'gemini'];
 }
 
 // If no input provided and not using markdown file, prompt for input

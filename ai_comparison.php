@@ -1598,75 +1598,7 @@ function callMistralOCR($apiKey, $pdfSource, $outputDir, $isLocalFile = false) {
                 echo "First page keys: " . json_encode(array_keys($responseData['pages'][0])) . "\n";
             }
         
-            if ($extractedText !== "Could not extract text from OCR results") {
-                echo "\nExtracted text from PDF via OCR:\n";
-                echo "---------------------------------\n";
-                echo substr($extractedText, 0, 500) . "...\n"; // Show first 500 chars
-                
-                // Now ask Mistral about the balance using the extracted text
-                $ocrPrompt = "I have extracted the following text from a financial statement using OCR. Please analyze it and tell me what the balance is:\n\n" . $extractedText;
-                
-                $data = [
-                    'model' => 'mistral-medium',
-                    'messages' => [
-                        ['role' => 'system', 'content' => "You are a helpful assistant that analyzes financial documents and provides accurate information from them."],
-                        ['role' => 'user', 'content' => $ocrPrompt]
-                    ],
-                    'temperature' => 0.2,
-                    'max_tokens' => 500
-                ];
-                
-                $headers = [
-                    'Authorization: Bearer ' . $apiKey,
-                    'Content-Type: application/json'
-                ];
-                
-                $ch = curl_init('https://api.mistral.ai/v1/chat/completions');
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_POST, true);
-                curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-                
-                $response = curl_exec($ch);
-                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                
-                if ($httpCode !== 200) {
-                    $error = curl_error($ch);
-                    curl_close($ch);
-                    echo "Error analyzing OCR results: " . ($error ?: 'HTTP Code ' . $httpCode) . "\n";
-                } else {
-                    curl_close($ch);
-                    
-                    $analysisData = json_decode($response, true);
-                    
-                    if (isset($analysisData['choices'][0]['message']['content'])) {
-                        $analysisResult = $analysisData['choices'][0]['message']['content'];
-                        
-                        echo "\nAnalysis of OCR results:\n";
-                        echo $analysisResult . "\n";
-                        
-                        // Save the analysis to a file
-                        $outputFile = $outputDir . "/mistral_ocr_analysis_{$timestamp}.txt";
-                        file_put_contents($outputFile, "====== Mistral OCR Analysis ======\n\n" . $analysisResult . "\n\n");
-                        
-                        if (isset($analysisData['usage'])) {
-                            file_put_contents($outputFile, "Token Usage:\n", FILE_APPEND);
-                            file_put_contents($outputFile, "Prompt tokens: " . $analysisData['usage']['prompt_tokens'] . "\n", FILE_APPEND);
-                            file_put_contents($outputFile, "Completion tokens: " . $analysisData['usage']['completion_tokens'] . "\n", FILE_APPEND);
-                            file_put_contents($outputFile, "Total tokens: " . $analysisData['usage']['total_tokens'] . "\n", FILE_APPEND);
-                        }
-                        
-                        echo "OCR analysis saved to: " . $outputFile . "\n";
-                        
-                        $result = [
-                            'extracted_text' => $extractedText,
-                            'analysis' => $analysisResult,
-                            'timestamp' => $timestamp
-                        ];
-                    }
-                }
-            } else {
+            if ($extractedText == "Could not extract text from OCR results") {
                 echo "No text was extracted from the OCR results.\n";
             }
         } else {

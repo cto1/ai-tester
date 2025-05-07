@@ -7,6 +7,7 @@ require_once __DIR__ . '/providers/ClaudeProvider.php';
 require_once __DIR__ . '/providers/MistralProvider.php';
 require_once __DIR__ . '/providers/MistralOcrProvider.php';
 require_once __DIR__ . '/providers/DeepseekProvider.php';
+require_once __DIR__ . '/providers/GeminiProvider.php';
 require_once __DIR__ . '/utils/ResponseFormatter.php';
 require_once __DIR__ . '/config/BankStatementQuestions.php';
 
@@ -20,7 +21,8 @@ try {
         'OPENAI_API_KEY',
         'CLAUDE_API_KEY',
         'MISTRAL_API_KEY',
-        'DEEPSEEK_API_KEY'
+        'DEEPSEEK_API_KEY',
+        'GEMINI_API_KEY'
     ]);
     
     // Configuration
@@ -40,6 +42,10 @@ try {
         'deepseek' => [
             'api_key' => $_ENV['DEEPSEEK_API_KEY'],
             'model' => $_ENV['DEEPSEEK_MODEL'] ?? 'deepseek-chat'
+        ],
+        'gemini' => [
+            'api_key' => $_ENV['GEMINI_API_KEY'],
+            'model' => $_ENV['GEMINI_MODEL'] ?? 'gemini-pro'
         ]
     ];
     
@@ -48,7 +54,8 @@ try {
         'openai' => new OpenaiProvider($config['openai']['api_key']),
         'claude' => new ClaudeProvider($config['claude']['api_key']),
         'mistral' => new MistralProvider($config['mistral']['api_key']),
-        'deepseek' => new DeepseekProvider($config['deepseek']['api_key'])
+        'deepseek' => new DeepseekProvider($config['deepseek']['api_key']),
+        'gemini' => new GeminiProvider($config['gemini']['api_key'])
     ];
     
     // Initialize OCR provider
