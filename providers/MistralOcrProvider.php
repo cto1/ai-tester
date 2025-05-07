@@ -5,11 +5,13 @@ require_once __DIR__ . '/../utils/FileUploader.php';
 
 class MistralOcrProvider implements AiProviderInterface {
     private $apiKey;
+    private $model;
     private $maxRetries = 3;
     private $fileUploader;
     
-    public function __construct(string $apiKey) {
+    public function __construct(string $apiKey, string $model = 'mistral-ocr-latest') {
         $this->apiKey = $apiKey;
+        $this->model = $model;
         $this->fileUploader = new FileUploader($apiKey);
     }
     
@@ -44,7 +46,7 @@ class MistralOcrProvider implements AiProviderInterface {
             echo "Sending request to Mistral OCR API...\n";
             
             $data = [
-                'model' => 'mistral-ocr-latest',
+                'model' => $this->model,
                 'document' => [
                     'type' => 'document_url',
                     'document_url' => $fileUrl

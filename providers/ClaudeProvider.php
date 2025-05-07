@@ -4,10 +4,12 @@ require_once __DIR__ . '/AiProviderInterface.php';
 
 class ClaudeProvider implements AiProviderInterface {
     private $apiKey;
+    private $model;
     private $maxRetries = 3;
     
-    public function __construct(string $apiKey) {
+    public function __construct(string $apiKey, string $model = 'claude-3-opus-20240229') {
         $this->apiKey = $apiKey;
+        $this->model = $model;
     }
     
     public function callApi(string $prompt, string $systemPrompt, string $outputDir): ?array {
@@ -44,7 +46,7 @@ class ClaudeProvider implements AiProviderInterface {
         $latencyMs = 0;
         
         $data = [
-            'model' => 'claude-3-opus-20240229',
+            'model' => $this->model,
             'system' => $systemPrompt,
             'messages' => [
                 ['role' => 'user', 'content' => $prompt]

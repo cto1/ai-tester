@@ -4,15 +4,17 @@ require_once __DIR__ . '/AiProviderInterface.php';
 
 class GeminiProvider implements AiProviderInterface {
     private $apiKey;
+    private $model;
     private $maxRetries = 3;
     
-    public function __construct(string $apiKey) {
+    public function __construct(string $apiKey, string $model = 'gemini-pro') {
         $this->apiKey = $apiKey;
+        $this->model = $model;
     }
     
     public function callApi(string $prompt, string $systemPrompt, string $outputDir): ?array {
         echo "\n====== Google Gemini ======\n";
-        echo "Sending request to Google Gemini...\n";
+        echo "Sending request to Google Gemini ({$this->model})...\n";
         
         $result = $this->callApiWithoutEcho($prompt, $systemPrompt);
         if (!$result) {
@@ -53,8 +55,8 @@ class GeminiProvider implements AiProviderInterface {
             ]
         ];
         
-        // Gemini API URL - using Gemini Pro model
-        $apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=' . $this->apiKey;
+        // Gemini API URL - using the specified model
+        $apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/{$this->model}:generateContent?key=" . $this->apiKey;
         
         $headers = [
             'Content-Type: application/json'

@@ -51,15 +51,15 @@ try {
     
     // Initialize providers
     $allProviders = [
-        'openai' => new OpenaiProvider($config['openai']['api_key']),
-        'claude' => new ClaudeProvider($config['claude']['api_key']),
-        'mistral' => new MistralProvider($config['mistral']['api_key']),
-        'deepseek' => new DeepseekProvider($config['deepseek']['api_key']),
-        'gemini' => new GeminiProvider($config['gemini']['api_key'])
+        'openai' => new OpenaiProvider($config['openai']['api_key'], $config['openai']['model']),
+        'claude' => new ClaudeProvider($config['claude']['api_key'], $config['claude']['model']),
+        'mistral' => new MistralProvider($config['mistral']['api_key'], $config['mistral']['model']),
+        'deepseek' => new DeepseekProvider($config['deepseek']['api_key'], $config['deepseek']['model']),
+        'gemini' => new GeminiProvider($config['gemini']['api_key'], $config['gemini']['model'])
     ];
     
     // Initialize OCR provider
-    $ocrProvider = new MistralOcrProvider($config['mistral']['api_key']);
+    $ocrProvider = new MistralOcrProvider($config['mistral']['api_key'], $_ENV['MISTRAL_OCR_MODEL'] ?? 'mistral-ocr-latest');
     
     // Initialize response formatter
     $formatter = new ResponseFormatter();

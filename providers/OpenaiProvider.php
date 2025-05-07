@@ -4,10 +4,12 @@ require_once __DIR__ . '/AiProviderInterface.php';
 
 class OpenaiProvider implements AiProviderInterface {
     private $apiKey;
+    private $model;
     private $maxRetries = 3;
     
-    public function __construct(string $apiKey) {
+    public function __construct(string $apiKey, string $model = 'gpt-4-turbo-preview') {
         $this->apiKey = $apiKey;
+        $this->model = $model;
     }
     
     public function callApi(string $prompt, string $systemPrompt, string $outputDir): ?array {
@@ -45,7 +47,7 @@ class OpenaiProvider implements AiProviderInterface {
         $latencyMs = 0;
         
         $data = [
-            'model' => 'gpt-4o',
+            'model' => $this->model,
             'messages' => [
                 ['role' => 'system', 'content' => $systemPrompt],
                 ['role' => 'user', 'content' => $prompt]
