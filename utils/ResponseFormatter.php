@@ -62,6 +62,11 @@ class ResponseFormatter {
             $content = "====== {$provider} Response ======\n\n";
             $content .= $result['content'] . "\n\n";
             
+            // Add Latency if available
+            if (isset($result['latency_ms'])) {
+                $content .= "Latency: " . $result['latency_ms'] . " ms\n";
+            }
+
             if (isset($result['tokens_in']) || isset($result['tokens_out'])) {
                 $content .= "Token Usage:\n";
                 if (isset($result['tokens_in'])) {
@@ -70,8 +75,15 @@ class ResponseFormatter {
                 if (isset($result['tokens_out'])) {
                     $content .= "Output tokens: " . $result['tokens_out'] . "\n";
                 }
+                // Add total tokens if both are present for non-OCR providers (OCR provider already has 'tokens_in' and 'tokens_out' as 0)
+                if ($provider !== 'mistral-ocr' && isset($result['tokens_in']) && isset($result['tokens_out'])) {
+                    $totalTokens = $result['tokens_in'] + $result['tokens_out'];
+                    $content .= "Total tokens: " . $totalTokens . "\n";
+                }
             }
             
+            $content .= "\n"; // Add a newline for separation before next potential section
+
             file_put_contents($outputFile, $content);
             echo "Response saved to: {$outputFile}\n";
         }

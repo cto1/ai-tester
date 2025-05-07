@@ -42,6 +42,7 @@ class DeepseekProvider implements AiProviderInterface {
         $response = null;
         $responseData = null;
         $httpCode = 0;
+        $latencyMs = 0;
         
         $data = [
             'model' => 'deepseek-chat',
@@ -72,7 +73,11 @@ class DeepseekProvider implements AiProviderInterface {
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
             
+            $startTime = microtime(true);
             $response = curl_exec($ch);
+            $endTime = microtime(true);
+            $latencyMs = round(($endTime - $startTime) * 1000);
+
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             $error = curl_error($ch);
             curl_close($ch);
@@ -106,7 +111,8 @@ class DeepseekProvider implements AiProviderInterface {
         return [
             'content' => $responseData['choices'][0]['message']['content'],
             'tokens_in' => $responseData['usage']['prompt_tokens'] ?? 0,
-            'tokens_out' => $responseData['usage']['completion_tokens'] ?? 0
+            'tokens_out' => $responseData['usage']['completion_tokens'] ?? 0,
+            'latency_ms' => $latencyMs
         ];
     }
 } 

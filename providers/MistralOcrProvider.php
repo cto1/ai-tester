@@ -19,6 +19,7 @@ class MistralOcrProvider implements AiProviderInterface {
         $fileUrl = null;
         $fileId = null;
         $result = null;
+        $latencyMs = 0; // Initialize latency
         
         try {
             // If we're processing a local file, upload it to Mistral first
@@ -64,7 +65,11 @@ class MistralOcrProvider implements AiProviderInterface {
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
             curl_setopt($ch, CURLOPT_TIMEOUT, 120); // Longer timeout for OCR
             
+            $startTime = microtime(true); // Start timer
             $response = curl_exec($ch);
+            $endTime = microtime(true); // End timer
+            $latencyMs = round(($endTime - $startTime) * 1000); // Calculate latency in ms
+
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             
             if ($httpCode !== 200) {
@@ -149,7 +154,8 @@ class MistralOcrProvider implements AiProviderInterface {
                     
                     $result = [
                         'extracted_text' => $extractedText,
-                        'timestamp' => $timestamp
+                        'timestamp' => $timestamp,
+                        'latency_ms' => $latencyMs // Add latency to the result
                     ];
                 }
             }
