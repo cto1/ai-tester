@@ -64,3 +64,6 @@ Thumbs.db
 .tmp/
 *.swp
 *.swo
+
+# Output
+output_*

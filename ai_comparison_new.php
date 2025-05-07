@@ -62,8 +62,18 @@ try {
     if (empty($input)) {
         throw new RuntimeException("No input provided. Please provide either a file path or text input.");
     }
+
+    // Check if input is a file path and read its contents
+    if (file_exists($input)) {
+        $fileContents = file_get_contents($input);
+        if ($fileContents === false) {
+            throw new RuntimeException("Failed to read file: {$input}");
+        }
+        $input = $fileContents;
+    }
     
     // Get selected providers
+    $selectedProviders = $_POST['providers'] ?? array_keys($allProviders);
     $providers = array_intersect_key($allProviders, array_flip($selectedProviders));
     
     // Create output directory
@@ -123,8 +133,14 @@ try {
         
         // Prepare the prompt with questions
         $prompt = $input . "\n\nPlease analyze the above text and answer the following questions:\n\n";
-        foreach ($questions as $index => $question) {
-            $prompt .= ($index + 1) . ". " . $question . "\n";
+        $questionNum = 1;
+        foreach ($questions as $key => $question) {
+            if (substr($key, 0, 9) === '_section_') {
+                $prompt .= "\n" . $question . "\n\n";
+            } else {
+                $prompt .= $questionNum . ". " . $question . "\n";
+                $questionNum++;
+            }
         }
         
         // Call the API with the selected provider
